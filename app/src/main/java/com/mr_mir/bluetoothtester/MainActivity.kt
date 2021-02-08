@@ -9,6 +9,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
+import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.Toast
@@ -24,7 +25,7 @@ import com.karumi.dexter.listener.single.PermissionListener
 import kotlinx.android.synthetic.main.activity_main.*
 
 
-class MainActivity : AppCompatActivity(), PermissionListener {
+class MainActivity : AppCompatActivity(), PermissionListener, View.OnClickListener {
     private var REQUEST_BLUETOOTH = 1
     private var PERMISSIONS_REQUEST_LOCATION = 100
     private var permanentlyDenied = false
@@ -64,6 +65,7 @@ class MainActivity : AppCompatActivity(), PermissionListener {
         getThisDeviceData()
         setAvailableRecycleView()
         getBluetoothDevices()
+        setListeners()
     }
 
     private fun getThisDeviceData() {
@@ -87,6 +89,11 @@ class MainActivity : AppCompatActivity(), PermissionListener {
         llMainView.visibility = GONE
     }
     private fun mainView() {
+        if(bluetoothAdapter != null && bluetoothAdapter.isEnabled) {
+            tvThisDevice.setTextColor(resources.getColor(R.color.colorAccent))
+        } else {
+            tvThisDevice.setTextColor(resources.getColor(android.R.color.black))
+        }
         tvLoading.visibility = GONE
         llMainView.visibility = VISIBLE
     }
@@ -158,5 +165,23 @@ class MainActivity : AppCompatActivity(), PermissionListener {
     override fun onPermissionRationaleShouldBeShown(p0: PermissionRequest?, p1: PermissionToken?) {
         p1?.continuePermissionRequest()
 
+    }
+
+    private fun setListeners() {
+        tvThisDevice.setOnClickListener(this)
+    }
+
+    override fun onClick(v: View?) {
+        when (v?.id) {
+            R.id.tvThisDevice -> {
+                if(bluetoothAdapter != null && bluetoothAdapter.isEnabled) {
+                    bluetoothAdapter.disable()
+                    tvThisDevice.setTextColor(resources.getColor(android.R.color.black))
+                } else {
+                    bluetoothAdapter?.enable()
+                    tvThisDevice.setTextColor(resources.getColor(R.color.colorAccent))
+                }
+            }
+        }
     }
 }
